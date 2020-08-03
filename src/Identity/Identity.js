@@ -23,7 +23,7 @@ function Identity(x) {
 
     const i = f(x)
 
-    if (!i || !i.type || i.type() !== type)
+    if (!i || !i.type || i.type !== type)
       throw new TypeError('function must return an Identity')
 
     return i
@@ -33,14 +33,14 @@ function Identity(x) {
     if (!isFunction(x))
       throw new TypeError('Identity.ap wrapped value must be a function')
 
-    if (identity.type() !== Identity.type())
+    if (identity.type !== Identity.type)
       throw new TypeError('Identity.ap expects an identity')
 
     return identity.map(x)
   }
 
   const equals = function equals(identity) {
-    return type === identity.type() && x === identity.extract()
+    return type === identity.type && x === identity.extract()
   }
 
   return freeze({
@@ -49,13 +49,15 @@ function Identity(x) {
     chain,
     ap,
     equals,
+    type,
     of: _of,
-    type: typeFn,
+    toString: typeFn,
+    constructor: Identity,
   })
 }
 
 Identity.of = _of
-Identity.type = typeFn
+Identity.type = type
 Identity['@@type'] = type
 
 module.exports = Identity

@@ -19,7 +19,7 @@ describe('Task', () => {
     assert.isObject(Task(() => {}))
   })
   it('has type of "Task"', function () {
-    assert.equal(Task.type(), 'Task')
+    assert.equal(Task.type, 'Task')
   })
   it('has @@type of "Task"', function () {
     assert.equal(Task['@@type'], 'Task')
@@ -96,10 +96,8 @@ describe('Task.map', () => {
     )
   })
   it('returns a Task', () => {
-    const type = Task((rej, res) => res(1))
-      .map(identity)
-      .type()
-    expect(type).to.equal(Task.type())
+    const type = Task((rej, res) => res(1)).map(identity).type
+    expect(type).to.equal(Task.type)
   })
   it('calls map when resolved and does not call when rejected', done => {
     const mapFn = sinon.fake()
@@ -194,7 +192,7 @@ describe('Task.ap', () => {
 
 describe('Task.of', () => {
   it('returns a Task', () => {
-    assert.isTrue(Task.of(5).type() === Task.type())
+    assert.isTrue(Task.of(5).type === Task.type)
   })
   it('has same type as instance', () => {
     assert.equal(Task.of, Task(noop).of)
@@ -230,11 +228,7 @@ describe('Task.of', () => {
 
 describe('Task.chain', () => {
   it('returns a Task', () => {
-    assert.isTrue(
-      Task.of(5)
-        .chain(x => Task.of(2))
-        .type() === Task.type()
-    )
+    assert.isTrue(Task.of(5).chain(x => Task.of(2)).type === Task.type)
   })
   it('takes one argument that is a function', () => {
     fc.assert(

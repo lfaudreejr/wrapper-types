@@ -30,7 +30,7 @@ function Task(executor) {
   }
 
   const ap = function ap(other) {
-    if (other.type() !== Task.type())
+    if (other.type !== Task.type)
       throw new TypeError('Task.ap expects an identity')
 
     // Apply f => f a ~> f (a -> b) -> f b
@@ -48,14 +48,15 @@ function Task(executor) {
     map,
     chain,
     ap,
+    type,
     of: _of,
-    type: typeFn,
+    toString: typeFn,
     constructor: Task,
   })
 }
 
 Task.of = _of
-Task.type = typeFn
+Task.type = type
 Task['@@type'] = type
 
 module.exports = Task

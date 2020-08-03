@@ -16,7 +16,7 @@ describe('Identity', () => {
     )
   })
   it('has type of "Identity"', function () {
-    assert.equal(Identity.type(), 'Identity')
+    assert.equal(Identity.type, 'Identity')
   })
   it('has @@type of "Identity"', function () {
     assert.equal(Identity['@@type'], 'Identity')
@@ -89,7 +89,7 @@ describe('Identity.map', () => {
   it('returns an Identity', function () {
     fc.assert(
       fc.property(fc.anything(), any => {
-        expect(Identity(any).type()).to.equal(Identity.type())
+        expect(Identity(any).type).to.equal(Identity.type)
       })
     )
   })
@@ -128,7 +128,7 @@ describe('Identity.chain', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
         const i = Identity(any)
-        expect(i.chain(x => Identity(x)).type()).to.equal(Identity.type())
+        expect(i.chain(x => Identity(x)).type).to.equal(Identity.type)
         expect(i.chain.bind(i, identity)).to.throw(
           'function must return an Identity'
         )
