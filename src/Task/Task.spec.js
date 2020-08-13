@@ -41,6 +41,13 @@ describe('Task', () => {
         assert.equal(leftSuccess.args[0][0], rightSuccess.args[0][0])
 
         // right identity
+        const fail = sinon.spy()
+        const succeed = sinon.spy()
+        Task((rej, res) => res(intOne))
+          .chain(x => Task.of(x))
+          .fork(fail, succeed)
+
+        assert.isTrue(succeed.calledWith(intOne))
       })
     )
   })
@@ -48,17 +55,17 @@ describe('Task', () => {
 
 describe('Task.fork', () => {
   it('expects two functions as its arguments', () => {
-    const task = Task(() => {})
+    const task = Task((rej, res) => res(2))
     const fn = () => {}
-    const exception = 'Task.fork (reject, resolve) must be functions'
-    expect(task.fork.bind(task, fn)).to.throw(exception)
-    expect(task.fork.bind(task, 1)).to.throw(exception)
-    expect(task.fork.bind(task, 'str')).to.throw(exception)
-    expect(task.fork.bind(task, false)).to.throw(exception)
-    expect(task.fork.bind(task, undefined)).to.throw(exception)
-    expect(task.fork.bind(task, {})).to.throw(exception)
-    expect(task.fork.bind(task, 2)).to.throw(exception)
-    expect(task.fork.bind(task, fn, fn)).to.not.throw(exception)
+    const exception = 'Task.fork must wrap function'
+    assert.throws(task.fork.bind(task, fn))
+    assert.throws(task.fork.bind(task, 1))
+    assert.throws(task.fork.bind(task, 'str'))
+    assert.throws(task.fork.bind(task, false))
+    assert.throws(task.fork.bind(task, undefined))
+    assert.throws(task.fork.bind(task, {}))
+    assert.throws(task.fork.bind(task, 2))
+    assert.doesNotThrow(task.fork.bind(task, fn, fn))
   })
   it('will call reject when forked if reject is returned', done => {
     const hasFailed = 'has failed'
@@ -91,9 +98,7 @@ describe('Task.fork', () => {
 describe('Task.map', () => {
   it('must have a function argument', () => {
     const task = Task((rej, res) => res('resolve'))
-    expect(task.map.bind(task, 3)).to.throw(
-      'Task.map expects function argument'
-    )
+    expect(task.map.bind(task, 3)).to.throw('Task.map must wrap function')
   })
   it('returns a Task', () => {
     const type = Task((rej, res) => res(1)).map(identity).type
@@ -119,7 +124,7 @@ describe('Task.map', () => {
 
     done()
   })
-  it('implements Functor [fantasy-land/map]', done => {
+  it('is a Functor implementing [fantasy-land/map]', done => {
     const addOne = x => x + 1
     const timesTwo = x => x * 2
     const addOneThenTimesTwo = x => timesTwo(addOne(x))
@@ -153,7 +158,7 @@ describe('Task.map', () => {
 })
 
 describe('Task.ap', () => {
-  it('fails if wrapped value of Apply is not a function', done => {
+  it('fails if wrapped value of Task is not a function', done => {
     const task = Task.of(3)
     const fail = sinon.fake()
     const success = sinon.fake()
@@ -165,7 +170,7 @@ describe('Task.ap', () => {
 
     done()
   })
-  it('implements Apply [fantasy-land/ap]', () => {
+  it('is an Apply implementing [fantasy-land/ap]', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
         fc.pre(!isNaN(any))
@@ -194,10 +199,10 @@ describe('Task.of', () => {
   it('returns a Task', () => {
     assert.isTrue(Task.of(5).type === Task.type)
   })
-  it('has same type as instance', () => {
+  it('is same type as instance', () => {
     assert.equal(Task.of, Task(noop).of)
   })
-  it('implements Applicative [fantasy-land/of]', () => {
+  it('is an Applicative implementing [fantasy-land/of]', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
         fc.pre(!isNaN(any))

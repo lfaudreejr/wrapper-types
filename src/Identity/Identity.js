@@ -1,63 +1,46 @@
-const { freeze, isFunction } = require('../helpers')
+const {
+  freeze,
+  isFunction,
+  wrapsFunction,
+  wrapsSomething,
+  wrapsType,
+} = require('../helpers')
 
 const type = 'Identity'
 const typeFn = () => type
 
-const _of = Identity
+const Identity = wrapsSomething('Identity')(x =>
+  freeze({
+    valueOf: () => x,
+    map: wrapsFunction('Identity.map')(f => Identity(f(x))),
+    chain: wrapsFunction('Identity.chain')(f => {
+      const i = f(x)
 
-function Identity(x) {
-  if (arguments.length == 0) throw new TypeError('Identity must wrap a value')
+      if (!i || !i.type || i.type !== type)
+        throw new TypeError('function must return an Identity')
 
-  const extract = function extract() {
-    return x
-  }
+      return i
+    }),
+    ap: wrapsType(Identity)(identity => {
+      if (!isFunction(x))
+        throw new TypeError('Identity.ap wrapped value must be a function')
 
-  const map = function map(f) {
-    if (!isFunction(f)) throw new TypeError('Identity.map expects a function')
-
-    return Identity(f(x))
-  }
-
-  const chain = function chain(f) {
-    if (!isFunction(f)) throw new TypeError('Identity.chain expects a function')
-
-    const i = f(x)
-
-    if (!i || !i.type || i.type !== type)
-      throw new TypeError('function must return an Identity')
-
-    return i
-  }
-
-  const ap = function ap(identity) {
-    if (!isFunction(x))
-      throw new TypeError('Identity.ap wrapped value must be a function')
-
-    if (identity.type !== Identity.type)
-      throw new TypeError('Identity.ap expects an identity')
-
-    return identity.map(x)
-  }
-
-  const equals = function equals(identity) {
-    return type === identity.type && x === identity.extract()
-  }
-
-  return freeze({
-    extract,
-    map,
-    chain,
-    ap,
-    equals,
+      return identity.map(x)
+    }),
+    equals: wrapsType(Identity)(identity => x === identity.valueOf()),
     type,
-    of: _of,
+    of: Identity,
     toString: typeFn,
     constructor: Identity,
   })
-}
+)
 
-Identity.of = _of
+Identity.of = Identity
 Identity.type = type
 Identity['@@type'] = type
+
+Object.defineProperty(Identity, Symbol.hasInstance, {
+  value: instance => instance['@@type'] === type,
+})
 
 module.exports = Identity

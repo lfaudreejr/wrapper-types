@@ -36,17 +36,17 @@ describe('Identity', () => {
         expect(
           Identity.of(intOne)
             .chain(x => Identity(intTwo))
-            .extract()
+            .valueOf()
         ).to.be.equal(identity(intTwo))
         // right identity
-        expect(iOne.chain(x => Identity.of(x)).extract()).to.be.equal(intOne)
+        expect(iOne.chain(x => Identity.of(x)).valueOf()).to.be.equal(intOne)
       })
     )
   })
 })
 
 describe('Identity.equals', () => {
-  it('implements [fantasy-land/equals]', function () {
+  it('is a Setoid implementing [fantasy-land/equals]', function () {
     fc.assert(
       fc.property(fc.string(), fc.boolean(), fc.integer(), (str, bool, num) => {
         //reflexivity
@@ -67,11 +67,11 @@ describe('Identity.equals', () => {
   })
 })
 
-describe('Identity.extract', () => {
+describe('Identity.valueOf', () => {
   it('extracts the value contained within the Identity', function () {
     fc.assert(
       fc.property(fc.anything(), any =>
-        assert.deepEqual(Identity(any).extract(), any)
+        assert.deepEqual(Identity(any).valueOf(), any)
       )
     )
   })
@@ -82,18 +82,18 @@ describe('Identity.map', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
         const map = Identity(any).map
-        assert.throws(map, 'Identity.map expects a function')
+        assert.throws(map, 'Identity.map must wrap function')
       })
     )
   })
   it('returns an Identity', function () {
     fc.assert(
       fc.property(fc.anything(), any => {
-        expect(Identity(any).type).to.equal(Identity.type)
+        expect(Identity(any).map(identity).type).to.equal(Identity.type)
       })
     )
   })
-  it('implements [fantasy-land/map]', function () {
+  it('is a Functor implementing [fantasy-land/map]', function () {
     fc.assert(
       fc.property(fc.integer(), int => {
         const addOne = x => x + 1
@@ -103,12 +103,12 @@ describe('Identity.map', () => {
         assert.isTrue(
           Identity(int)
             .map(a => a)
-            .extract() === int
+            .valueOf() === int
         )
         //composition
         assert.isTrue(
-          Identity(int).map(addOneThenTimesTwo).extract() ===
-            Identity(int).map(addOne).map(timesTwo).extract()
+          Identity(int).map(addOneThenTimesTwo).valueOf() ===
+            Identity(int).map(addOne).map(timesTwo).valueOf()
         )
       })
     )
@@ -120,7 +120,7 @@ describe('Identity.chain', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
         const chain = Identity(any).chain
-        assert.throws(chain, 'Identity.chain expects a function')
+        assert.throws(chain, 'Identity.chain must wrap function')
       })
     )
   })
@@ -135,15 +135,15 @@ describe('Identity.chain', () => {
       })
     )
   })
-  it('implements [fantasy-land/chain]', function () {
+  it('implements Chain [fantasy-land/chain]', function () {
     const f = x => Identity(x + 1)
     const g = x => Identity(x + 2)
     fc.assert(
       fc.property(fc.integer(), int => {
         const i = Identity(int)
         // associativity
-        expect(i.chain(f).chain(g).extract()).to.be.equal(
-          i.chain(x => f(x).chain(g)).extract()
+        expect(i.chain(f).chain(g).valueOf()).to.be.equal(
+          i.chain(x => f(x).chain(g)).valueOf()
         )
       })
     )
@@ -151,7 +151,7 @@ describe('Identity.chain', () => {
 })
 
 describe('Identity.ap', () => {
-  it('implements Apply [fantasy-land/ap]', function () {
+  it('is an Apply implementing [fantasy-land/ap]', function () {
     const compose = f => g => x => f(g(x))
     const i = Identity(identity)
     const testOne = i.map(compose).ap(i).ap(i)
@@ -159,28 +159,28 @@ describe('Identity.ap', () => {
 
     //composition
     assert.equal(
-      testOne.ap(Identity(3)).extract(),
-      testTwo.ap(Identity(3)).extract()
+      testOne.ap(Identity(3)).valueOf(),
+      testTwo.ap(Identity(3)).valueOf()
     )
   })
 })
 
 describe('Identity.of', () => {
-  it('implements Applicative [fantasy-land/of]', () => {
+  it('is an Applicative implementing [fantasy-land/of]', () => {
     fc.assert(
       fc.property(fc.integer(), int => {
         expect(Identity(0).of).to.be.equal(Identity.of)
         const i = Identity(identity)
 
         //identity
-        expect(i.ap(Identity.of(int)).extract()).to.be.equal(int)
+        expect(i.ap(Identity.of(int)).valueOf()).to.be.equal(int)
         // homomorphism
-        expect(i.ap(Identity.of(int)).extract()).to.be.equal(
-          Identity.of(identity(int)).extract()
+        expect(i.ap(Identity.of(int)).valueOf()).to.be.equal(
+          Identity.of(identity(int)).valueOf()
         )
         // interchange
-        expect(i.ap(Identity.of(int)).extract()).to.be.equal(
-          Identity.of(applyFnTo(int)).ap(i).extract()
+        expect(i.ap(Identity.of(int)).valueOf()).to.be.equal(
+          Identity.of(applyFnTo(int)).ap(i).valueOf()
         )
       })
     )
