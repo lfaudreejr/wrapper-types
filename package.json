@@ -1,13 +1,19 @@
 {
   "name": "wrappers",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Abstract Data Types",
   "main": "index.js",
   "scripts": {
     "test": "mocha **/*.spec.js --watch"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "IO",
+    "Task",
+    "Identity",
+    "ADT",
+    "Abstract Data Type"
+  ],
+  "author": "Larry B Faudree Jr",
   "license": "ISC",
   "devDependencies": {
     "fast-check": "2.0.0",
