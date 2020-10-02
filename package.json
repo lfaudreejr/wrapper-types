@@ -1,5 +1,5 @@
 {
-  "name": "wrappers",
+  "name": "wrapper-types",
   "version": "0.1.0",
   "description": "Abstract Data Types",
   "main": "index.js",
@@ -12,7 +12,9 @@
     "Task",
     "Identity",
     "ADT",
-    "Abstract Data Type"
+    "Abstract Data Type",
+    "wrappers",
+    "wrapper-types"
   ],
   "author": "Larry B Faudree Jr",
   "license": "ISC",
