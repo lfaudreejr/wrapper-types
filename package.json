@@ -4,7 +4,8 @@
   "description": "Abstract Data Types",
   "main": "index.js",
   "scripts": {
-    "test": "mocha **/*.spec.js --watch"
+    "test:watch": "mocha **/*.spec.js --watch",
+    "test": "mocha **/*.spec.js"
   },
   "keywords": [
     "IO",
