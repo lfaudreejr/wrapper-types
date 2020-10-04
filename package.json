@@ -4,8 +4,8 @@
   "description": "Abstract Data Types",
   "main": "index.js",
   "scripts": {
-    "test": "nyc npm run mocha:test && nyc report --reporter=text-lcov | coveralls",
-    "mocha:test": "mocha **/*.spec.js",
+    "test": "mocha **/*.spec.js",
+    "cover:test": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "watch:test": "mocha **/*.spec.js --watch"
   },
   "keywords": [
