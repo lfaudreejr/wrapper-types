@@ -1,6 +1,6 @@
 {
   "name": "wrapper-types",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Abstract Data Types",
   "main": "index.js",
   "scripts": {
