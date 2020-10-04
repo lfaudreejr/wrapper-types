@@ -4,7 +4,7 @@
   "description": "Abstract Data Types",
   "main": "index.js",
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text mocha **/*.spec.js",
+    "test": "nyc --reporter=lcov --reporter=text mocha **/*.spec.js",
     "cover:test": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "watch:test": "mocha **/*.spec.js --watch"
   },
