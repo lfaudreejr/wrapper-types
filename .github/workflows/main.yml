@@ -15,9 +15,11 @@ jobs:
           node-version: 10.x
 
       - name: npm install, make test-coverage
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           npm install
-          npm run cover
+          npm run cover:test
 
       - name: Coveralls
         uses: coverallsapp/github-action@master

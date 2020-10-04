@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha **/*.spec.js",
-    "cover": "nyc npm test && nyc report --reporter=lcov --reporter=text && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "cover:test:local": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
+    "cover:test": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "watch:test": "mocha **/*.spec.js --watch"
   },
   "keywords": [
