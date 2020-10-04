@@ -4,7 +4,8 @@
   "description": "Abstract Data Types",
   "main": "index.js",
   "scripts": {
-    "test": "mocha **/*.spec.js",
+    "test": "nyc npm run mocha:test && nyc report --reporter=text-lcov | coveralls",
+    "mocha:test": "mocha **/*.spec.js",
     "watch:test": "mocha **/*.spec.js --watch"
   },
   "keywords": [
@@ -19,9 +20,12 @@
   "author": "Larry B Faudree Jr",
   "license": "ISC",
   "devDependencies": {
+    "chai": "4.2.0",
+    "coveralls": "^3.1.0",
     "fast-check": "2.0.0",
     "mocha": "8.0.1",
-    "chai": "4.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^15.1.0",
     "sinon": "9.0.2"
   },
   "dependencies": {}
