@@ -1,14 +1,7 @@
-# This is a basic workflow to help you get started with Actions
 
 name: Test && Test Coverage
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: ["push", "pull_request"]
 
 jobs:
 
@@ -27,7 +20,7 @@ jobs:
     - name: npm install, make test-coverage
       run: |
         npm install
-        npm test
+        npm run cover:test
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
