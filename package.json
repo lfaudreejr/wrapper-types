@@ -2,6 +2,11 @@
   "name": "wrapper-types",
   "version": "0.1.4",
   "description": "Abstract Data Types",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lfaudreejr/wrapper-types.git"
+  },
+  "homepage": "https://github.com/lfaudreejr/wrapper-types",
   "main": "index.js",
   "scripts": {
     "test": "mocha **/*.spec.js",
@@ -17,8 +22,8 @@
     "wrappers",
     "wrapper-types"
   ],
-  "author": "Larry B Faudree Jr",
-  "license": "ISC",
+  "author": "lfaudreejr",
+  "license": "MIT",
   "devDependencies": {
     "chai": "4.2.0",
     "coveralls": "^3.1.0",
