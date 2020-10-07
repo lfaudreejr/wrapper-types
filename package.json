@@ -4,7 +4,7 @@
   "description": "Abstract Data Types",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lfaudreejr/wrapper-types.git"
+    "url": "git://github.com/lfaudreejr/wrapper-types.git"
   },
   "homepage": "https://github.com/lfaudreejr/wrapper-types",
   "main": "index.js",
@@ -14,6 +14,8 @@
     "watch": "mocha **/*.spec.js --watch"
   },
   "keywords": [
+    "monad",
+    "functor",
     "IO",
     "Task",
     "Identity",
@@ -22,7 +24,7 @@
     "wrappers",
     "wrapper-types"
   ],
-  "author": "lfaudreejr",
+  "author": "Larry Faudree Jr",
   "license": "MIT",
   "devDependencies": {
     "chai": "4.2.0",
