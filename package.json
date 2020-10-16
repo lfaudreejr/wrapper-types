@@ -9,9 +9,9 @@
   "homepage": "https://github.com/lfaudreejr/wrapper-types",
   "main": "index.js",
   "scripts": {
-    "test": "mocha **/*.spec.js",
+    "test": "mocha ./src/**/*.spec.js",
     "cover": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
-    "watch": "mocha **/*.spec.js --watch"
+    "watch": "mocha ./src/**/*.spec.js --watch"
   },
   "keywords": [
     "monad",
@@ -35,5 +35,7 @@
     "nyc": "^15.1.0",
     "sinon": "9.0.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "daggy": "^1.4.0"
+  }
 }

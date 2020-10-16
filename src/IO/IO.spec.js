@@ -6,240 +6,179 @@ const IO = require('./IO')
 const { spy } = require('sinon')
 
 describe('IO', () => {
-  it('is a function', () => {
-    assert.isTrue(isFunction(IO))
-  })
-  it('wraps a function', () => {
-    assert.throws(IO, 'IO must wrap function')
-    assert.throws(IO.bind(IO, 3), 'IO must wrap function')
-  })
-  it('returns an object', () => {
-    assert.isObject(IO(identity))
-  })
-  it('has type of "IO"', () => {
-    assert.isTrue(IO.type === 'IO')
-  })
-  it('has an "@@type" of "IO"', () => {
-    assert.isTrue(IO['@@type'] === 'IO')
-  })
-  it('returns a sealed (frozen) object', () => {
-    assert.sealed(IO(identity))
-  })
-})
-
-describe('IO.run', () => {
-  it('it calls the wrapped functon', () => {
-    const spy = sinon.spy()
-    const io = IO(spy)
-
-    io.run()
-
-    assert.isTrue(spy.called)
-  })
-})
-
-describe('IO.map', () => {
-  it('expects a function argument', () => {
+  it('expects a function input', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
-        const map = IO(() => any).map
-        assert.throw(map, 'IO.map must wrap function')
+        assert.throws(IO.bind(IO, any), 'IO expects a function')
       })
     )
+  })
+  it('has an is type method', () => {
+    assert.isTrue(typeof IO.is === 'function')
   })
   it('returns an IO', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        expect(IO(identity).map(identity).type).to.equal(IO.type)
-      })
-    )
-  })
-  it('is a Functor implementing [fantasy-land/map]', () => {
-    fc.assert(
-      fc.property(fc.string(), str => {
-        // identity
-        assert.equal(
-          IO(() => str)
-            .map(identity)
-            .run(),
-          str
-        )
-        // composition
-        const f = s => s.toUpperCase()
-        const g = s => s + '!!!'
-        assert.equal(
-          IO(() => str)
-            .map(x => f(g(x)))
-            .run(),
-          IO(() => str)
-            .map(g)
-            .map(f)
-            .run()
-        )
-      })
-    )
-  })
-})
-
-describe('IO.ap', () => {
-  it('fails if return of wrapped value of IO is not a function', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        const bad = IO(() => any).ap(IO.of(any))
-        const good = IO(() => identity).ap(IO.of(any))
-
-        assert.throws(bad.run)
-        assert.doesNotThrow(good.run)
-      })
-    )
-  })
-  it('expects an IO as argument', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        const io = IO(identity)
-        assert.throws(io.ap.bind(io, any))
-        assert.doesNotThrow(
-          io.ap.bind(
-            io,
-            IO(() => any)
-          )
-        )
-      })
-    )
-  })
-  it('is an Apply implementing [fantasy-land/ap]', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        fc.pre(!isNaN(any))
-
-        // composition
-        const io = IO(() => identity)
-        const compose = f => g => x => f(g(x))
-
-        const one = io.map(compose).ap(io).ap(io).ap(IO.of(any))
-        const two = io.ap(io.ap(io)).ap(IO.of(any))
-
-        assert.equal(one.run(), two.run())
-      })
-    )
-  })
-})
-
-describe('IO.chain', () => {
-  it('is a function', () => {
-    assert.isTrue(isFunction(IO(identity).chain))
-  })
-  it('expects function argument', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        assert.throws(
-          IO(identity).chain.bind(IO, any),
-          'IO.chain must wrap function'
-        )
-        assert.doesNotThrow(IO(identity).chain.bind(IO, () => {}))
-      })
-    )
-  })
-  it('passed function must return an IO', () => {
     fc.assert(
       fc.property(fc.anything(), any => {
         const io = IO(() => any)
-        const badFake = () => any
-        const goodFake = () => IO(identity)
-
-        assert.throws(io.chain(badFake).run.bind(io), 'IO.chain must return IO')
-        assert.doesNotThrow(io.chain(goodFake).run.bind(io))
+        assert.isTrue(IO.is(io))
       })
     )
   })
-  it('implements Chain [fantasy-land/chain]', () => {
-    fc.assert(
-      fc.property(fc.string(), str => {
-        const io = IO(() => str)
-        const f = str => IO(() => str.toUpperCase())
-        const g = str => IO(() => str + '!!!')
-
-        assert.isTrue(isFunction(io.ap))
-
-        assert.equal(
-          io.chain(f).chain(g).run(),
-          io
-            .chain(x => f(x))
-            .chain(g)
-            .run()
-        )
-      })
-    )
+  it('has a run method', () => {
+    assert.isTrue(typeof IO(() => 3).run === 'function')
   })
-})
-
-describe('IO.concat', () => {
-  it('is a function', () => {
-    assert.isTrue(isFunction(IO(identity).concat))
+  it('has a map method', () => {
+    assert.isTrue(typeof IO(() => 3).map === 'function')
   })
-  it('expects an IO as argument', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        assert.throws(IO(() => any).concat.bind(IO, any))
-        assert.doesNotThrow(IO(() => any).concat.bind(IO, IO(identity)))
-      })
-    )
+  it('has an ap method', () => {
+    assert.isTrue(typeof IO(() => 3).ap === 'function')
   })
-  it('is a Semigroup implementing [fantasy-land/concat]', () => {
-    fc.assert(
-      fc.property(fc.string(), fc.integer(), (str, int) => {
-        // associativity
-        const one = IO(() => str)
-
-        assert.equal(
-          one.concat(IO.of(str)).concat(IO.of(str)).run(),
-          one.concat(IO.of(str).concat(IO.of(str))).run()
-        )
-
-        const two = IO(() => int)
-
-        assert.equal(
-          two.concat(IO.of(int)).concat(IO.of(int)).run(),
-          two.concat(IO.of(int).concat(IO.of(int))).run()
-        )
-      })
-    )
+  it('has an of method', () => {
+    assert.isTrue(typeof IO.of === 'function')
   })
-})
-
-describe('IO.of', () => {
-  it('returns an IO', () => {
-    assert.isTrue(IO.of(4).type === IO.type)
+  it('has a chain method', () => {
+    assert.isTrue(typeof IO(() => 3).chain === 'function')
   })
-  it('is same type as instance', () => {
-    assert.equal(IO.of, IO(noop).of)
+
+  describe('IO.map', () => {
+    it('expects a function as its argument', function () {
+      fc.assert(
+        fc.property(fc.anything(), any => {
+          fc.pre(!isNaN(any))
+
+          const io = IO(identity)
+          assert.throw(io.map.bind(io, any), 'IO.map expects a function')
+          assert.doesNotThrow(io.map.bind(io, identity))
+        })
+      )
+    })
+    it('fulfills the [fantasy/land map] spec (identity)', () => {
+      // u['fantasy-land/map'](a => a)
+      fc.assert(
+        fc.property(fc.integer(), int => {
+          const u = IO(() => int)
+
+          assert.equal(u.map(identity).run(), int)
+        })
+      )
+    })
+    it('fulfills the [fantasy/land map] spec (composition)', () => {
+      // u['fantasy-land/map'](x => f(g(x))) is equivalent to u['fantasy-land/map'](g)['fantasy-land/map'](f) (composition)
+      fc.assert(
+        fc.property(fc.integer(), int => {
+          const u = IO(() => int)
+          const f = x => x + x
+          const g = x => x * x
+
+          assert.equal(u.map(x => f(g(x))).run(), u.map(g).map(f).run())
+        })
+      )
+    })
   })
-  it('is an Applicative implementing [fantasy-land/of]', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        fc.pre(!isNaN(any))
 
-        // identity
-        const io = IO.of(identity)
+  describe('IO.ap', () => {
+    it('expects an IO argument', () => {
+      fc.assert(
+        fc.property(fc.anything(), any => {
+          const io = IO(() => any)
 
-        assert.equal(io.ap(IO.of(any)).run(), any)
+          assert.throws(io.ap.bind(io, any), 'IO.ap expects an IO')
+        })
+      )
+    })
+    it('fulfills the [fantasy/land ap] spec (composition)', () => {
+      // v['fantasy-land/ap'](u['fantasy-land/ap'](a['fantasy-land/map'](f => g => x => f(g(x))))) is equivalent to v['fantasy-land/ap'](u)['fantasy-land/ap'](a) (composition)
+      fc.assert(
+        fc.property(fc.integer(), fc.integer(), (int1, int2) => {
+          const o_f = x => x + int1
+          const o_g = x => x * int2
+          const composer = f => g => x => f(g(x))
+          const v = IO(() => int1)
+          const u = IO(() => o_g)
+          const a = IO(() => o_f)
+          assert.equal(v.ap(u.ap(a.map(composer))).run(), v.ap(u).ap(a).run())
+        })
+      )
+    })
+  })
 
-        // homomorphism
-        const f = () => any
+  describe('IO.of', () => {
+    it('lifts some input into IO', () => {
+      fc.assert(
+        fc.property(fc.anything(), any => {
+          fc.pre(!isNaN(any))
+          const io = IO.of(any)
 
-        assert.equal(
-          IO.of(f).ap(IO.of(identity)).run(),
-          IO.of(f(identity)).run()
-        )
+          assert.equal(io.run(), any)
+        })
+      )
+    })
+    it('implements [fantasy-land/of] spec (identity)', () => {
+      // v['fantasy-land/ap'](A['fantasy-land/of'](x => x)) is equivalent to v (identity)
+      fc.assert(
+        fc.property(fc.anything(), any => {
+          fc.pre(!isNaN(any))
+          const v = IO(() => any)
 
-        // interchange
-        assert.equal(
-          IO.of(identity).ap(IO.of(any)).run(),
-          IO.of(f => f(any))
-            .ap(IO.of(identity))
-            .run()
-        )
-      })
-    )
+          assert.equal(v.ap(IO.of(identity)).run(), any)
+        })
+      )
+    })
+    it('implements [fantasy-land/of] spec (homomorphism)', () => {
+      // A['fantasy-land/of'](x)['fantasy-land/ap'](A['fantasy-land/of'](f)) is equivalent to A['fantasy-land/of'](f(x)) (homomorphism)
+      fc.assert(
+        fc.property(fc.anything(), any => {
+          fc.pre(!isNaN(any))
+
+          assert.equal(
+            IO.of(any).ap(IO.of(identity)).run(),
+            IO.of(identity(any)).run()
+          )
+        })
+      )
+    })
+    it('implements [fantasy-land/of] spec (interchange)', () => {
+      // A['fantasy-land/of'](y)['fantasy-land/ap'](u) is equivalent to u['fantasy-land/ap'](A['fantasy-land/of'](f => f(y))) (interchange)
+      fc.assert(
+        fc.property(fc.integer(), y => {
+          fc.pre(!isNaN(y))
+          const u = IO(() => identity)
+
+          assert.equal(IO.of(y).ap(u).run(), u.ap(IO.of(f => f(y))).run())
+        })
+      )
+    })
+  })
+
+  describe('IO.chain', () => {
+    it('expects a function argument that returns an IO', () => {
+      fc.assert(
+        fc.property(fc.anything(), any => {
+          fc.pre(!isNaN(any))
+
+          const c = IO(() => any)
+          const f = () => IO(() => any)
+          const g = () => any
+          assert.throws(c.chain.bind(c, any), 'IO.chain expects a function')
+          assert.throws(c.chain.bind(c, g), 'argument must return an IO')
+          assert.doesNotThrow(c.chain.bind(c, f))
+        })
+      )
+    })
+    it('implements [fantasy-land/chain] spec (associativity)', () => {
+      // m['fantasy-land/chain'](f)['fantasy-land/chain'](g) is equivalent to m['fantasy-land/chain'](x => f(x)['fantasy-land/chain'](g)) (associativity)
+      fc.assert(
+        fc.property(fc.integer(), int => {
+          const f = x => IO(() => int + x)
+          const g = x => IO(() => x * int)
+          const m = IO(() => int)
+
+          assert.equal(
+            m.chain(f).chain(g).run(),
+            m.chain(x => f(x).chain(g)).run()
+          )
+        })
+      )
+    })
   })
 })

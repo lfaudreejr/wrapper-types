@@ -1,3 +1,4 @@
+const daggy = require('daggy')
 const {
   freeze,
   isFunction,
@@ -6,41 +7,46 @@ const {
   wrapsType,
 } = require('../helpers')
 
-const type = 'Identity'
-const typeFn = () => type
+const TYPE = 'Identity'
+const _value = Symbol('_value')
 
-const Identity = wrapsSomething('Identity')(x =>
-  freeze({
-    valueOf: () => x,
-    map: wrapsFunction('Identity.map')(f => Identity(f(x))),
-    chain: wrapsFunction('Identity.chain')(f => {
-      const i = f(x)
+const Identity = daggy.tagged('Identity', [_value])
 
-      if (!i || !i.type || i.type !== type)
-        throw new TypeError('function must return an Identity')
+Identity.prototype.map = function (fn) {
+  if (!isFunction(fn)) throw new Error('Identity.map expects a function')
 
-      return i
-    }),
-    ap: wrapsType(Identity)(identity => {
-      if (!isFunction(x))
-        throw new TypeError('Identity.ap wrapped value must be a function')
+  return Identity(fn(this[_value]))
+}
 
-      return identity.map(x)
-    }),
-    equals: wrapsType(Identity)(identity => x === identity.valueOf()),
-    type,
-    of: Identity,
-    toString: typeFn,
-    constructor: Identity,
-  })
-)
+Identity.prototype.extend = function (fn) {
+  if (!isFunction(fn)) throw new Error('Identity.extend expects a function')
 
-Identity.of = Identity
-Identity.type = type
-Identity['@@type'] = type
+  return Identity(fn(this))
+}
 
-Object.defineProperty(Identity, Symbol.hasInstance, {
-  value: instance => instance['@@type'] === type,
-})
+Identity.prototype.extract = function () {
+  return this[_value]
+}
+
+Identity.prototype.chain = function (fn) {
+  if (!isFunction(fn)) throw new Error('Identity.chain expects a function')
+
+  return this.map(fn).extract()
+}
+
+Identity.prototype.ap = function (other) {
+  if (!Identity.is(other)) throw new Error('Identity.ap expects an Identity')
+
+  return other.chain(f => this.map(f))
+}
+
+Identity.prototype.equals = function (other) {
+  if (!Identity.is(other)) return false
+  return this.extract() === other.extract()
+}
+
+Identity.of = function (x) {
+  return Identity(x)
+}
 
 module.exports = Identity

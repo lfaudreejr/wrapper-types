@@ -1,45 +1,50 @@
-const {
-  freeze,
-  isFunction,
-  wrapsFunction,
-  wrapsFunctions,
-  wrapsType,
-} = require('../helpers')
+const daggy = require('daggy')
+const { isFunction } = require('../helpers')
 
-const type = 'Task'
-const typeFn = () => type
+const TYPE = 'Task'
+const _value = Symbol('_value')
 
-const Task = wrapsFunction('Task')(executor =>
-  freeze({
-    of: _of,
-    map: wrapsFunction('Task.map')(fn =>
-      Task((rej, res) => executor(rej, x => res(fn(x))))
-    ),
-    chain: wrapsFunction('Task.chain')(fn =>
-      Task((rej, res) => executor(rej, x => fn(x).fork(rej, res)))
-    ),
-    ap: wrapsType(Task)(other =>
-      Task((rej, res) =>
-        wrapsFunction('Task.fork')(
-          executor(rej, fn => other.fork(rej, x => res(fn(x))))
-        )
-      )
-    ),
-    toString: typeFn,
-    constructor: Task,
-    fork: wrapsFunctions('Task.fork')(executor),
-    type,
-  })
-)
+const task = daggy.tagged('Task', [_value])
 
-let _of = x => Task((_, res) => res(x))
+const Task = function (fork) {
+  if (!isFunction(fork)) throw new Error('Task expects a function')
 
-Task.of = _of
-Task.type = type
-Task['@@type'] = type
+  return task(fork)
+}
 
-Object.defineProperty(Task, Symbol.hasInstance, {
-  value: instance => instance['@@type'] === type,
-})
+task.prototype.fork = function (reject, resolve) {
+  if (!isFunction(reject) || !isFunction(resolve))
+    throw new Error('fork expects two function arguments')
+
+  return this[_value](reject, resolve)
+}
+
+task.prototype.map = function (fn) {
+  if (!isFunction(fn)) throw new Error('Task.map expects a function')
+
+  return Task((rej, res) => this.fork(rej, x => res(fn(x))))
+}
+
+task.prototype.ap = function (other) {
+  if (!Task.is(other)) throw new Error('Task.ap expects a Task')
+
+  return Task((rej, res) =>
+    other.fork(rej, fn => this.fork(rej, x => res(fn(x))))
+  )
+}
+
+task.prototype.chain = function (fn) {
+  if (!isFunction(fn)) throw new Error('Task.chain expects a function')
+
+  return Task((rej, res) => this.fork(rej, x => fn(x).fork(rej, res)))
+}
+
+Task.is = function (other) {
+  return task.is(other)
+}
+
+Task.of = function (x) {
+  return Task((rej, res) => res(x))
+}
 
 module.exports = Task

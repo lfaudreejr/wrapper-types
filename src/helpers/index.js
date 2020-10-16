@@ -1,5 +1,4 @@
 const identity = any => any
-const freeze = object => Object.freeze(object)
 const applyFnTo = any => fn => fn(any)
 const typeCheck = typeName => type => typeof type === typeName
 const isFunction = typeCheck('function')
@@ -21,32 +20,14 @@ const checkFnArgs = typeName => fnName => wrappedFn => (...args) => {
   }
   return wrappedFn(...args)
 }
-const wrapsSomething = fnName => fn => (...args) => {
-  if (args.length === 0) throw new TypeError(`${fnName} must wrap a value`)
-  return fn(...args)
-}
-const wrapsType = type => fn => other => {
-  if (
-    !other instanceof type ||
-    !other.hasOwnProperty('type') ||
-    other.type !== type.type
-  )
-    throw new TypeError(`${type.type} expected`)
-  return fn(other)
-}
 const noop = () => {}
 
 module.exports = {
   identity,
-  freeze,
   applyFnTo,
   typeCheck,
   isFunction,
   checkFnArg,
   checkFnArgs,
   noop,
-  wrapsType,
-  wrapsFunction: checkFnArg('function'),
-  wrapsFunctions: checkFnArgs('function'),
-  wrapsSomething,
 }

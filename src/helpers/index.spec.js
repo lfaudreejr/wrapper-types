@@ -3,17 +3,7 @@ const sinon = require('sinon')
 const { expect, assert } = require('chai')
 const helpers = require('./')
 const IO = require('../IO/IO')
-const {
-  applyFnTo,
-  identity,
-  freeze,
-  isFunction,
-  typeCheck,
-  wrapsFunction,
-  wrapsFunctions,
-  checkFnArg,
-  wrapsType,
-} = require('./')
+const { applyFnTo, identity, isFunction, typeCheck, checkFnArg } = require('./')
 
 describe('identity', () => {
   it('returns the value it was given', () => {
@@ -21,18 +11,6 @@ describe('identity', () => {
       fc.property(fc.anything(), any => {
         fc.pre(!isNaN(any))
         expect(identity(any)).to.be.equal(any)
-      })
-    )
-  })
-})
-
-describe('freeze', () => {
-  it('shallow freezes the object properties', () => {
-    fc.assert(
-      fc.property(fc.object(), fc.anything(), (obj, anyvalue) => {
-        const frozen = freeze(obj)
-
-        expect(frozen).to.be.sealed
       })
     )
   })
@@ -88,43 +66,5 @@ describe('checkFnArg', () => {
     assert.doesNotThrow(test.bind(null, 'testing'))
     assert.throws(test.bind(null, 123))
     assert.throws(test.bind(null, () => {}))
-  })
-})
-
-describe('wrapsFunction', () => {
-  it('throws if argument to wrapped fn is not a function', () => {
-    const test = wrapsFunction('TestFn')(x => x)
-    assert.doesNotThrow(test.bind(null, () => {}))
-    assert.throws(test.bind(null, 123))
-    assert.throws(test.bind(null, 'hello'))
-  })
-})
-
-describe('wrapsFunctions', () => {
-  it('throws if all arguments to wrapped fn is not a function', () => {
-    const test = wrapsFunctions('TestFn')((rej, res) => res(2))
-    assert.doesNotThrow(
-      test.bind(
-        null,
-        () => {},
-        () => {}
-      )
-    )
-    assert.throws(test.bind(null, 123))
-    assert.throws(test.bind(null, () => {}, 123))
-    assert.throws(test.bind(null, 'hello', () => {}))
-  })
-})
-
-describe('wrapsType', () => {
-  it('throws if argument type does not match type', () => {
-    fc.assert(
-      fc.property(fc.anything(), any => {
-        const wrapped = wrapsType(IO)(other => other)
-
-        assert.throws(wrapped.bind(wrapped, any))
-        assert.doesNotThrow(wrapped.bind(wrapped, IO))
-      })
-    )
   })
 })

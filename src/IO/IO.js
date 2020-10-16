@@ -1,44 +1,47 @@
+const daggy = require('daggy')
 const { freeze, isFunction, wrapsFunction, wrapsType } = require('../helpers')
 
-const type = 'IO'
-const typeFn = () => type
+const TYPE = 'IO'
+const _value = Symbol('_value')
 
-const IO = wrapsFunction('IO')(run =>
-  freeze({
-    of: _of,
-    map: wrapsFunction('IO.map')(fn => IO(() => fn(run()))),
-    ap: wrapsType(IO)(other =>
-      IO(() => {
-        const ran = run()
-        if (!isFunction(ran))
-          throw new TypeError('IO.ap run must return function')
-        return other.map(ran).run()
-      })
-    ),
-    chain: wrapsFunction('IO.chain')(fn =>
-      IO(() => {
-        const unwrapped = fn(run())
-        if (!unwrapped || unwrapped.type != type)
-          throw new TypeError('IO.chain must return IO')
-        return unwrapped.run()
-      })
-    ),
-    concat: wrapsType(IO)(other => IO(() => other.map(run).run())),
-    run,
-    type,
-    toString: typeFn,
-    constructor: IO,
-  })
-)
+const io = daggy.tagged('IO', [_value])
 
-let _of = x => IO(() => x)
+const IO = function (fn) {
+  if (!isFunction(fn)) throw new Error('IO expects a function')
 
-IO.of = _of
-IO.type = type
-IO['@@type'] = type
+  return io(fn)
+}
 
-Object.defineProperty(IO, Symbol.hasInstance, {
-  value: instance => instance['@@type'] === type,
-})
+io.prototype.run = function () {
+  return this[_value]()
+}
+
+io.prototype.map = function (fn) {
+  if (!isFunction(fn)) throw new Error('IO.map expects a function')
+
+  return IO(() => fn(this.run()))
+}
+
+io.prototype.ap = function (other) {
+  if (!IO.is(other)) throw new Error('IO.ap expects an IO')
+
+  return other.map(f => f(this.run()))
+}
+
+io.prototype.chain = function (fn) {
+  if (!isFunction(fn)) throw new Error('IO.chain expects a function')
+
+  if (!IO.is(fn())) throw new Error('argument must return an IO')
+
+  return this.map(fn).run()
+}
+
+IO.is = function (x) {
+  return io.is(x)
+}
+
+IO.of = function (x) {
+  return IO(() => x)
+}
 
 module.exports = IO
