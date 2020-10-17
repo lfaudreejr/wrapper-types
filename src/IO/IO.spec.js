@@ -3,7 +3,6 @@ const { expect, assert } = require('chai')
 const sinon = require('sinon')
 const { identity, isFunction, noop } = require('../helpers')
 const IO = require('./IO')
-const { spy } = require('sinon')
 
 describe('IO', () => {
   it('expects a function input', () => {

@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const { expect, assert } = require('chai')
 const helpers = require('./')
 const IO = require('../IO/IO')
-const { applyFnTo, identity, isFunction, typeCheck, checkFnArg } = require('./')
+const { applyFnTo, identity, isFunction, typeCheck, isNothing } = require('./')
 
 describe('identity', () => {
   it('returns the value it was given', () => {
@@ -60,11 +60,16 @@ describe('isFunction', () => {
   })
 })
 
-describe('checkFnArg', () => {
-  it('throws if wrapped fn argument does not match type check', () => {
-    const test = checkFnArg('string')('TestFn')(x => x)
-    assert.doesNotThrow(test.bind(null, 'testing'))
-    assert.throws(test.bind(null, 123))
-    assert.throws(test.bind(null, () => {}))
+describe('isNothing', () => {
+  it('returns true if value is null or undefined', () => {
+    fc.assert(
+      fc.property(fc.anything(), any => {
+        fc.pre(any !== null && any !== undefined)
+        assert.isFalse(isNothing(any))
+
+        assert.isTrue(isNothing(undefined))
+        assert.isTrue(isNothing(null))
+      })
+    )
   })
 })
