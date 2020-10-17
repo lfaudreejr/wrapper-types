@@ -38,6 +38,18 @@ describe('IO', () => {
   it('has a chain method', () => {
     assert.isTrue(typeof IO(() => 3).chain === 'function')
   })
+  it('implements the Monad spec (left identity) (right identity)', () => {
+    fc.assert(
+      fc.property(fc.integer(), int => {
+        // M['fantasy-land/of'](a)['fantasy-land/chain'](f) is equivalent to f(a) (left identity)
+
+        const M = IO.of(int)
+        const f = x => IO.of(x + x)
+
+        assert.equal(M.chain(f).run(), f(int).run())
+      })
+    )
+  })
 
   describe('IO.map', () => {
     it('expects a function as its argument', function () {

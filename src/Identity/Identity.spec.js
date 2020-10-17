@@ -36,6 +36,18 @@ describe('Identity', () => {
   it('has an equals method', () => {
     assert.isTrue(typeof Identity(2).equals === 'function')
   })
+  it('implements the Monad spec (left identity) (right identity)', () => {
+    fc.assert(
+      fc.property(fc.integer(), int => {
+        // M['fantasy-land/of'](a)['fantasy-land/chain'](f) is equivalent to f(a) (left identity)
+
+        const M = Identity.of(int)
+        const f = x => Identity.of(x + x)
+
+        assert.equal(M.chain(f).extract(), f(int).extract())
+      })
+    )
+  })
 
   describe('Identity.map', () => {
     it('expects function as its argument', function () {

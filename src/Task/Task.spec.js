@@ -51,6 +51,24 @@ describe('Task', () => {
   it('has a chain method', () => {
     assert.isTrue(typeof Task(() => {}).chain === 'function')
   })
+  it('implements the Monad spec (left identity) (right identity)', done => {
+    fc.assert(
+      fc.property(fc.integer(), int => {
+        // M['fantasy-land/of'](a)['fantasy-land/chain'](f) is equivalent to f(a) (left identity)
+
+        const M = Task.of(int)
+        const f = x => Task.of(x + x)
+        const successFakeOne = sandbox.fake()
+        const successFakeTwo = sandbox.fake()
+
+        M.chain(f).fork(noop, successFakeOne)
+        f(int).fork(noop, successFakeTwo)
+
+        assert.equal(successFakeOne.args[0][0], successFakeOne.args[0][0])
+      })
+    )
+    done()
+  })
 
   describe('Task.fork', () => {
     it('expects two function arguments', () => {

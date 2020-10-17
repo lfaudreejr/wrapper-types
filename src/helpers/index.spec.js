@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const { expect, assert } = require('chai')
 const helpers = require('./')
 const IO = require('../IO/IO')
-const { applyFnTo, identity, isFunction, typeCheck, isNothing } = require('./')
+const { identity, isFunction, typeCheck, isNothing } = require('./')
 
 describe('identity', () => {
   it('returns the value it was given', () => {
@@ -11,16 +11,6 @@ describe('identity', () => {
       fc.property(fc.anything(), any => {
         fc.pre(!isNaN(any))
         expect(identity(any)).to.be.equal(any)
-      })
-    )
-  })
-})
-
-describe('applyFnTo', () => {
-  it('(value, fn) => fn(value)', () => {
-    fc.assert(
-      fc.property(fc.integer(), int => {
-        expect(applyFnTo(int)(identity)).to.be.equal(int)
       })
     )
   })
