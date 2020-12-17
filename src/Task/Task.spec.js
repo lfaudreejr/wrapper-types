@@ -266,4 +266,16 @@ describe('Task', () => {
       done()
     })
   })
+
+  describe('Task.rejected', () => {
+    it('should call the left or reject function', () => {
+      const reject = sinon.spy()
+      const success = sinon.spy()
+
+      Task.rejected(1).fork(reject, success)
+
+      assert.isTrue(reject.called)
+      assert.isTrue(success.notCalled)
+    })
+  })
 })

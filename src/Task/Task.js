@@ -47,4 +47,8 @@ Task.of = function (x) {
   return Task((rej, res) => res(x))
 }
 
+Task.rejected = function (x) {
+  return Task((rej, res) => rej(x))
+}
+
 module.exports = Task
